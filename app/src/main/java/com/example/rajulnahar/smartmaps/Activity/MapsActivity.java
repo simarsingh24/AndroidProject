@@ -2,6 +2,7 @@ package com.example.rajulnahar.smartmaps.Activity;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -40,7 +41,10 @@ import com.example.rajulnahar.smartmaps.R;
 import com.example.rajulnahar.smartmaps.Database.SmartMapsdb;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderApi;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -50,6 +54,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -114,7 +119,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public static boolean gpsfixed = false;
     private final int LOCATION_PERMISSION = 1;
     public boolean locationPermissionAvailable = false;
-
     public List<com.example.rajulnahar.smartmaps.Objects.Location> locationList;
 
 
@@ -125,7 +129,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public ListviewAdapter listviewAdapter;
 
     ConnectivityManager connectivityManager;
-
+    private FusedLocationProviderClient mFusedLocationClient;
+    Location currrentLocation = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,6 +161,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
                 locationLocked();
+
+
             }
         }.execute();
 
@@ -240,7 +247,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             alertToSwitchGPS();
         }
-        connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(MapsActivity.this);
+        mFusedLocationClient.getLastLocation()
+                .addOnSuccessListener(MapsActivity.this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if (location != null) {
+                            currrentLocation = location;
+                            locationLocked();
+
+                        }
+                    }
+                });
+
+
+
+    connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         listedPlaceList = new ArrayList<>();
         //test purpose
         smartMapsdb = SmartMapsdb.getInstance(MapsActivity.this);
@@ -476,27 +499,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     private void enableMyLocation() {
-
-
         if(locationPermissionAvailable == false) return;
         mMap.setMyLocationEnabled(true);
-
     }
 
 
 
     public  void locationLocked(){
 
-        final Location location = mMap.getMyLocation();
-        if(location!=null) {
+        if(currrentLocation!=null) {
             loc = new com.example.rajulnahar.smartmaps.Objects.Location();
-            loc.setLat(String.valueOf(location.getLatitude()));
-            loc.setLng(String.valueOf(location.getLongitude()));
-            Constants.location = location;
-            Log.e("Recievedlocation", String.valueOf(location.getLongitude()));
-            mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude()))
+            loc.setLat(String.valueOf(currrentLocation.getLatitude()));
+            loc.setLng(String.valueOf(currrentLocation.getLongitude()));
+            Constants.location = currrentLocation;
+            Log.e("Recievedlocation", String.valueOf(currrentLocation.getLongitude()));
+            mMap.addMarker(new MarkerOptions().position(new LatLng(currrentLocation.getLatitude(), currrentLocation.getLongitude()))
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15.0f));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(currrentLocation.getLatitude(), currrentLocation.getLongitude()), 15.0f));
             SharedPreferences sharedPreferences = getSharedPreferences(Constants.sharedPrefrencename,MODE_PRIVATE);
             final String search = sharedPreferences.getString(Constants.categorykey,"temple|atm|food|bank|airport");
             final String distan = sharedPreferences.getString(Constants.distancekey,"1000");

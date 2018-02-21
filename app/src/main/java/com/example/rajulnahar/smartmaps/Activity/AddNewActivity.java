@@ -183,7 +183,7 @@ public class AddNewActivity extends AppCompatActivity implements GoogleMap.OnMyL
         mMap = map;
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMarkerDragListener(this);
-
+        mMap.setMyLocationEnabled(true);
         LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         if(location!=null) {
