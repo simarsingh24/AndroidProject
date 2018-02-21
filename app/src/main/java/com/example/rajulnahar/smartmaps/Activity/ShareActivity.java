@@ -20,6 +20,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.List;
@@ -55,8 +57,8 @@ public class ShareActivity extends AppCompatActivity implements OnMapReadyCallba
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_share);
-        initComponent();
         ButterKnife.bind(this);
+        initComponent();
         onClicks();
         btnShare.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -129,8 +131,9 @@ public class ShareActivity extends AppCompatActivity implements OnMapReadyCallba
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
-        googleMap.addMarker(new MarkerOptions().position(Constants.markerPoiSelect.getPosition()));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(Constants.markerPoiSelect.getPosition(),15.0f));
+        googleMap.addMarker(new MarkerOptions().position(new LatLng(Constants.location.getLatitude(),Constants.location.getLongitude())));
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Constants .location.getLatitude(),
+                Constants.location.getLongitude()), 15.0f));
     }
 
     public  void onShare(){

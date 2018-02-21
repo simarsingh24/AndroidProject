@@ -287,6 +287,7 @@ public class AddNewActivity extends AppCompatActivity implements GoogleMap.OnMyL
     public void onMarkerDragEnd(Marker marker) {
         mark.setTitle(String.valueOf(mark.getPosition().longitude));
         mark.showInfoWindow();
+        Constants.markerPoiSelect = marker;
 
     }
 }
