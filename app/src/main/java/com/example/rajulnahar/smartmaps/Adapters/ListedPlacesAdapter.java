@@ -53,7 +53,7 @@ public class ListedPlacesAdapter extends BaseAdapter {
         holder.positiontitle = (TextView) view.findViewById(R.id.positonname);
         holder.drivingtime.setText("Driving Time: "+ drivingtimeList.get(position));
         holder.walkingtime.setText("Walking Time: "+ walkingtimeList.get(position));
-        holder.positiontitle.setText("LatLong: "+ String.valueOf(latLngList.get(position).longitude)+" , "+String.valueOf(latLngList.get(position).latitude));
+        holder.positiontitle.setText("LatLong: "+ String.valueOf(latLngList.get(position).longitude).substring(0,6)+" , "+String.valueOf(latLngList.get(position).latitude).substring(0,6));
         return view;
     }
     public class Holder{
