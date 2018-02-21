@@ -245,7 +245,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         smartMapsdb.deleteTables();
         smartMapsdb.testCategory();
         listedPlaceList = smartMapsdb.getListedlace();
-        
+
 
         LayoutInflater inflater = (LayoutInflater)getBaseContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.distancedialog, null);

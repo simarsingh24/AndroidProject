@@ -115,6 +115,8 @@ public class AddNewActivity extends AppCompatActivity implements GoogleMap.OnMyL
                 Log.e("Database","Databse inset id: "  + String.valueOf(smartMapsdb.addListedPlace(listedPlace)));
                 Log.e("selected category:",listedPlace.category);
                 Toast.makeText(AddNewActivity.this,"Saved!",Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(AddNewActivity.this,ShareActivity.class);
+                startActivity(intent);
                 finish();
 
 

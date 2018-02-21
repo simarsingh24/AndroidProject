@@ -24,20 +24,26 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class ShareActivity extends AppCompatActivity implements OnMapReadyCallback {
-
+    @BindView(R.id.lv_left)
     ListView listViewleft;
+    @BindView(R.id.lv_right)
     ListView listViewright;
+    @BindView(R.id.btn_share)
     Button btnShare;
-
-    EditText comments;
-
+    @BindView(R.id.etComment)
+    EditText etComments;
+    @BindView(R.id.selectall)
     Button selectAll;
+    @BindView(R.id.clearall)
     Button clearAll;
 
     ListviewAdapter listviewAdapterleft;
     ListviewAdapter listviewAdapterright;
-    EditText etComments;
+
     public List<Categories> categories;
     public List<Categories> categoriesleft;
     public List<Categories> categoriesright;
@@ -49,17 +55,15 @@ public class ShareActivity extends AppCompatActivity implements OnMapReadyCallba
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_share);
-                btnShare.setOnClickListener(new View.OnClickListener() {
+        initComponent();
+        ButterKnife.bind(this);
+        onClicks();
+        btnShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onShare();
             }
         });
-
-        initComponent();
-        onClicks();
-
-
         supportMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         supportMapFragment.getMapAsync(this);
 
@@ -67,13 +71,6 @@ public class ShareActivity extends AppCompatActivity implements OnMapReadyCallba
 
     public void initComponent(){
         smartMapsdb = SmartMapsdb.getInstance(this);
-        btnShare = (Button) findViewById(R.id.btn_share);
-        listViewleft = (ListView) findViewById(R.id.lv_left);
-        listViewright = (ListView) findViewById(R.id.lv_right);
-        comments = (EditText) findViewById(R.id.etComment);
-        selectAll = (Button) findViewById(R.id.selectall);
-        clearAll = (Button) findViewById(R.id.clearall);
-        etComments = (EditText) findViewById(R.id.etComment);
         listviewAdapterleft = new ListviewAdapter(this);
         listviewAdapterright = new ListviewAdapter(this);
         categories = smartMapsdb.getAllCategories();
