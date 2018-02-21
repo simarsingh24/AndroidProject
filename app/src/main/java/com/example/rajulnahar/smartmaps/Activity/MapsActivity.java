@@ -113,7 +113,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public long lastgps = 0;
     public static boolean gpsfixed = false;
     private final int LOCATION_PERMISSION = 1;
-    private boolean locationPermissionAvailable = false;
+    public boolean locationPermissionAvailable = false;
 
     public List<com.example.rajulnahar.smartmaps.Objects.Location> locationList;
 
@@ -170,8 +170,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 saveToSharedPrefrences(Constants.distancekey, String.valueOf(distanceVal));
                 mMap.clear();
-                mMap.addMarker(new MarkerOptions().position(new LatLng(Constants.location.getLatitude(), Constants.location.getLongitude()))
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                //mMap.addMarker(new MarkerOptions().position(new LatLng(Constants.location.getLatitude(), Constants.location.getLongitude()))
+                  //      .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
                 listedPlaceList = smartMapsdb.getListedlace();
 
                 for (int i = 0; i < listedPlaceList.size(); i++) {

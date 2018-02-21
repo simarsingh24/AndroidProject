@@ -41,6 +41,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class AddNewActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
         OnMapReadyCallback,GoogleMap.OnMarkerDragListener,
         ActivityCompat.OnRequestPermissionsResultCallback {
@@ -52,12 +55,17 @@ public class AddNewActivity extends AppCompatActivity implements GoogleMap.OnMyL
     public LocationManager locationManager;
     public Marker mark;
     public SmartMapsdb smartMapsdb;
+    @BindView(R.id.btnSaveAndShare)
     public Button btnSaveAndShare;
+    @BindView(R.id.btnSave)
     public Button btnSave;
     public File image;
+    @BindView(R.id.btnAddPhoto)
     public Button btnAddPhoto;
+    @BindView(R.id.etComment)
     public EditText etComment;
     public List<Categories> categoryList;
+    @BindView(R.id.lv_category)
     public ListView listView;
     ListviewAdapter listviewAdapter;
     public List<Categories> selectedCategories;
@@ -65,10 +73,12 @@ public class AddNewActivity extends AppCompatActivity implements GoogleMap.OnMyL
 
     private GoogleMap mMap;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(com.example.rajulnahar.smartmaps.R.layout.activity_add_new);
+        ButterKnife.bind(this);
 
         initComponents();
         onClicks();
@@ -77,14 +87,10 @@ public class AddNewActivity extends AppCompatActivity implements GoogleMap.OnMyL
 
     public void initComponents(){
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        etComment = (EditText) findViewById(R.id.etComment);
+
         smartMapsdb = SmartMapsdb.getInstance(this);
         Constants.selectedCategories.clear();
-        btnSaveAndShare = (Button) findViewById(R.id.btnSaveAndShare);
-        btnAddPhoto = (Button) findViewById(R.id.btnAddPhoto);
-        btnSave = (Button) findViewById(R.id.btnSave);
         categoryList = smartMapsdb.getAllCategories();
-        listView = (ListView) findViewById(R.id.lv_category);
         listviewAdapter = new ListviewAdapter(this);
         listviewAdapter.setCategories(smartMapsdb.getAllCategories());
         listView.setAdapter(listviewAdapter);
@@ -177,10 +183,14 @@ public class AddNewActivity extends AppCompatActivity implements GoogleMap.OnMyL
         mMap = map;
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMarkerDragListener(this);
-        mark= mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.pin))
-                .position(new LatLng(Constants.location.getLatitude(),Constants.location.getLongitude())).draggable(true));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Constants.location.getLatitude(),Constants.location.getLongitude()),13.0f));
 
+        LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if(location!=null) {
+            mark = mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.pin))
+                    .position(new LatLng(location.getLatitude(), location.getLongitude())).draggable(true));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 13.0f));
+        }
 
 
     }
