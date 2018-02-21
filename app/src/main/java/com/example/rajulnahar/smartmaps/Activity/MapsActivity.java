@@ -1,9 +1,11 @@
 package com.example.rajulnahar.smartmaps.Activity;
 
+import android.Manifest;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationManager;
@@ -12,6 +14,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -50,12 +53,13 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback ,
-        GoogleApiClient.OnConnectionFailedListener ,
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
+        GoogleApiClient.OnConnectionFailedListener,
         GpsStatus.Listener,
-        GoogleMap.OnMarkerClickListener{
+        GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
+
     public LocationManager locationManager;
     public LocationListener locationListener;
     private GoogleApiClient mGoogleApiClient;
@@ -74,8 +78,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Dialog advsearch;
     Dialog poiPopup;
 
-    double latitudePOISelected=0;
-    double longitudePOISelected=0;
+    double latitudePOISelected = 0;
+    double longitudePOISelected = 0;
     Marker markerSelectedPoi;
 
     double distanceVal = 1000;
@@ -88,11 +92,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     LinearLayout ll_favourite;
     LinearLayout ll_share;
-    TextView tvDrivingDirection,tvWalkingDirection;
+    TextView tvDrivingDirection, tvWalkingDirection;
     SeekBar seekbar;
 
     public long lastgps = 0;
     public static boolean gpsfixed = false;
+    private final int LOCATION_PERMISSION = 1;
+    private boolean locationPermissionAvailable = false;
 
     public List<com.example.rajulnahar.smartmaps.Objects.Location> locationList;
 
@@ -106,7 +112,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     ConnectivityManager connectivityManager;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,12 +121,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
 
+        requestPermissions();
         initComponent();
         onClicks();
-        new AsyncTask<Void,Void,Void>(){
+        new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                while (!gpsfixed){
+                while (!gpsfixed) {
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
@@ -142,28 +148,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if(iskm)
-                distanceVal = progress;
+                if (iskm)
+                    distanceVal = progress;
                 else
-                    distanceVal = progress*0.621;
+                    distanceVal = progress * 0.621;
 
-                saveToSharedPrefrences(Constants.distancekey,String.valueOf(distanceVal));
+                saveToSharedPrefrences(Constants.distancekey, String.valueOf(distanceVal));
                 mMap.clear();
                 mMap.addMarker(new MarkerOptions().position(new LatLng(Constants.location.getLatitude(), Constants.location.getLongitude()))
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
                 listedPlaceList = smartMapsdb.getListedlace();
 
-                for(int i=0;i<listedPlaceList.size();i++){
-                    double distance = distance(Constants.location.getLatitude(),Constants.location.getLongitude(),Double.parseDouble(listedPlaceList.get(i).latitude),Double.parseDouble(listedPlaceList.get(i).longitude));
-                    for(int j = 0; j < Constants.selectedCategories.size(); j++){
-                        if(listedPlaceList.get(i).category.contains(Constants.selectedCategories.get(j))){
-                            if(iskm){
-                                if(distance<distanceVal)
-                                    mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(listedPlaceList.get(i).latitude),Double.parseDouble(listedPlaceList.get(i).longitude))));
-                            }
-                            else {
-                                if(distance*0.62<distanceVal)
-                                    mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(listedPlaceList.get(i).latitude),Double.parseDouble(listedPlaceList.get(i).longitude))));
+                for (int i = 0; i < listedPlaceList.size(); i++) {
+                    double distance = distance(Constants.location.getLatitude(), Constants.location.getLongitude(), Double.parseDouble(listedPlaceList.get(i).latitude), Double.parseDouble(listedPlaceList.get(i).longitude));
+                    for (int j = 0; j < Constants.selectedCategories.size(); j++) {
+                        if (listedPlaceList.get(i).category.contains(Constants.selectedCategories.get(j))) {
+                            if (iskm) {
+                                if (distance < distanceVal)
+                                    mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(listedPlaceList.get(i).latitude), Double.parseDouble(listedPlaceList.get(i).longitude))));
+                            } else {
+                                if (distance * 0.62 < distanceVal)
+                                    mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(listedPlaceList.get(i).latitude), Double.parseDouble(listedPlaceList.get(i).longitude))));
                             }
                         }
                     }
@@ -190,10 +195,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    public void initComponent(){
+    public void requestPermissions() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    LOCATION_PERMISSION);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == LOCATION_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                locationPermissionAvailable = true;
+            } else if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                locationPermissionAvailable = false;
+                Toast.makeText(this, "Location permissions needed!", Toast.LENGTH_SHORT).show();
+            }
+
+        }
+    }
+
+    public void initComponent() {
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        locationManager.addGpsStatusListener(this);
-        if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+        if(locationPermissionAvailable == true) locationManager.addGpsStatusListener(this);
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             alertToSwitchGPS();
         }
         connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
@@ -219,18 +248,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .Builder(this)
                 .addApi(Places.GEO_DATA_API)
                 .addApi(Places.PLACE_DETECTION_API)
-                .enableAutoManage(this,this)
+                .enableAutoManage(this, this)
                 .build();
 
         distancedialog = new Dialog(MapsActivity.this);
-        View view = LayoutInflater.from(MapsActivity.this).inflate(R.layout.distancedialog,null);
+        View view = LayoutInflater.from(MapsActivity.this).inflate(R.layout.distancedialog, null);
         distancedialog.setContentView(view);
         distancedialog.setTitle("Select distance in");
         inkm = (RadioButton) view.findViewById(R.id.distancekm);
         inmiles = (RadioButton) view.findViewById(R.id.distancemile);
 
         advsearch = new Dialog(MapsActivity.this);
-        view = LayoutInflater.from(MapsActivity.this).inflate(R.layout.searchdailog,null);
+        view = LayoutInflater.from(MapsActivity.this).inflate(R.layout.searchdailog, null);
         listView = (ListView) view.findViewById(R.id.categorylist);
         listviewAdapter = new ListviewAdapter(this);
         listviewAdapter.setCategories(smartMapsdb.getAllCategories());
@@ -240,17 +269,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         avdSearchButton = (Button) view.findViewById(R.id.btn_search);
 
         poiPopup = new Dialog(MapsActivity.this);
-        view = LayoutInflater.from(MapsActivity.this).inflate(R.layout.popupdialog,null);
+        view = LayoutInflater.from(MapsActivity.this).inflate(R.layout.popupdialog, null);
         poiPopup.setContentView(view);
         poiPopup.setTitle("POI Popup");
         ll_favourite = (LinearLayout) view.findViewById(R.id.ll_favourite);
-        ll_share = (LinearLayout)view.findViewById(R.id.ll_share);
+        ll_share = (LinearLayout) view.findViewById(R.id.ll_share);
         tvDrivingDirection = (TextView) view.findViewById(R.id.drivingdirection);
         tvWalkingDirection = (TextView) view.findViewById(R.id.walkingdirctions);
 
     }
 
-    public void onClicks(){
+    public void onClicks() {
         settings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -305,7 +334,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 Toast.makeText(MapsActivity.this, "List", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(MapsActivity.this,ListedPlaceActivity.class));
+                startActivity(new Intent(MapsActivity.this, ListedPlaceActivity.class));
             }
         });
 
@@ -313,7 +342,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 Toast.makeText(MapsActivity.this, "Add new", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(MapsActivity.this,AddNewActivity.class);
+                Intent intent = new Intent(MapsActivity.this, AddNewActivity.class);
                 startActivity(intent);
             }
         });
@@ -342,18 +371,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMap.clear();
                 mMap.addMarker(new MarkerOptions().position(new LatLng(Constants.location.getLatitude(), Constants.location.getLongitude()))
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-               listedPlaceList = smartMapsdb.getListedlace();
-                for(int i=0;i<listedPlaceList.size();i++){
-                    double distance = distance(Constants.location.getLatitude(),Constants.location.getLongitude(),Double.parseDouble(listedPlaceList.get(i).latitude),Double.parseDouble(listedPlaceList.get(i).longitude));
-                    for(int j = 0; j < Constants.selectedCategories.size(); j++){
-                        if(listedPlaceList.get(i).category.contains(Constants.selectedCategories.get(j))){
-                            if(iskm){
-                                if(distance<distanceVal)
-                                    mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(listedPlaceList.get(i).latitude),Double.parseDouble(listedPlaceList.get(i).longitude))));
-                            }
-                            else {
-                                if(distance*0.62<distanceVal)
-                                    mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(listedPlaceList.get(i).latitude),Double.parseDouble(listedPlaceList.get(i).longitude))));
+                listedPlaceList = smartMapsdb.getListedlace();
+                for (int i = 0; i < listedPlaceList.size(); i++) {
+                    double distance = distance(Constants.location.getLatitude(), Constants.location.getLongitude(), Double.parseDouble(listedPlaceList.get(i).latitude), Double.parseDouble(listedPlaceList.get(i).longitude));
+                    for (int j = 0; j < Constants.selectedCategories.size(); j++) {
+                        if (listedPlaceList.get(i).category.contains(Constants.selectedCategories.get(j))) {
+                            if (iskm) {
+                                if (distance < distanceVal)
+                                    mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(listedPlaceList.get(i).latitude), Double.parseDouble(listedPlaceList.get(i).longitude))));
+                            } else {
+                                if (distance * 0.62 < distanceVal)
+                                    mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(listedPlaceList.get(i).latitude), Double.parseDouble(listedPlaceList.get(i).longitude))));
                             }
                         }
                     }
@@ -369,8 +397,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Favourites favourites = new Favourites();
                 favourites.latitude = String.valueOf(latitudePOISelected);
                 favourites.longitude = String.valueOf(longitudePOISelected);
-                long arc =  smartMapsdb.addFavourites(favourites);
-                Log.e("add to fav",String.valueOf(arc));
+                long arc = smartMapsdb.addFavourites(favourites);
+                Log.e("add to fav", String.valueOf(arc));
                 markerSelectedPoi.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
                 poiPopup.dismiss();
             }
@@ -379,7 +407,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 Constants.selectedCategories.clear();
-                Intent intent = new Intent(MapsActivity.this,ShareActivity.class);
+                Intent intent = new Intent(MapsActivity.this, ShareActivity.class);
                 startActivity(intent);
             }
         });
@@ -387,7 +415,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 Constants.ModeDriving = TransportMode.DRIVING;
-                startActivity(new Intent(MapsActivity.this,DrivingDirectionsActivity.class));
+                startActivity(new Intent(MapsActivity.this, DrivingDirectionsActivity.class));
             }
         });
 
@@ -395,7 +423,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 Constants.ModeDriving = TransportMode.WALKING;
-                startActivity(new Intent(MapsActivity.this,DrivingDirectionsActivity.class));
+                startActivity(new Intent(MapsActivity.this, DrivingDirectionsActivity.class));
             }
         });
     }
@@ -421,7 +449,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return (rad * 180.0 / Math.PI);
     }
 
-    public void alertToSwitchGPS(){
+    public void alertToSwitchGPS() {
         AlertDialog.Builder alert = new AlertDialog.Builder(MapsActivity.this);
         alert.setCancelable(false)
                 .setMessage("Please Enable your GPS")
@@ -443,9 +471,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void enableMyLocation() {
 
-            mMap.setMyLocationEnabled(true);
+
+        if(locationPermissionAvailable == false) return;
+        mMap.setMyLocationEnabled(true);
 
     }
+
+
 
     public  void locationLocked(){
 
