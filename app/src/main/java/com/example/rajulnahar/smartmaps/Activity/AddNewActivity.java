@@ -32,6 +32,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -55,7 +56,6 @@ public class AddNewActivity extends AppCompatActivity implements GoogleMap.OnMyL
 
     private boolean mPermissionDenied = false;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-    public LocationManager locationManager;
     public Marker mark;
     public SmartMapsdb smartMapsdb;
     @BindView(R.id.btnSaveAndShare)
@@ -89,7 +89,6 @@ public class AddNewActivity extends AppCompatActivity implements GoogleMap.OnMyL
     }
 
     public void initComponents(){
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         smartMapsdb = SmartMapsdb.getInstance(this);
         Constants.selectedCategories.clear();
         categoryList = smartMapsdb.getAllCategories();
@@ -188,8 +187,7 @@ public class AddNewActivity extends AppCompatActivity implements GoogleMap.OnMyL
     public void onMapReady(GoogleMap map) {
         mMap = map;
         mMap.setOnMyLocationButtonClickListener(this);
-        mMap.setOnMarkerDragListener(this);
-        mMap.setMyLocationEnabled(true);
+        enableMyLocation();
         FusedLocationProviderClient mFusedLocationClient ;
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(AddNewActivity.this);
         mFusedLocationClient.getLastLocation()
@@ -225,15 +223,16 @@ public class AddNewActivity extends AppCompatActivity implements GoogleMap.OnMyL
 
     @Override
     public boolean onMyLocationButtonClick() {
-        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
         Location loc = mMap.getMyLocation();
         if(loc!=null) {
             //Log.e("latitude", String.valueOf(loc.getLatitude()));
-           mark= mMap.addMarker(new MarkerOptions().position(new LatLng(loc.getLatitude(),loc.getLongitude())).draggable(true));
+            mark.remove();
+           mark= mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.pin))
+                   .position(new LatLng(loc.getLatitude(),loc.getLongitude())).draggable(true));
 
-
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(loc.getLatitude(), loc.getLongitude()), 13.0f));
         }
         return false;
     }
