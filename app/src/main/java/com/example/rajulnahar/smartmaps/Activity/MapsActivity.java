@@ -191,6 +191,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        listedPlaceList = smartMapsdb.getListedlace();
+        locationLocked();
+    }
+
     public void requestPermissions() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -377,20 +384,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View v) {
                 advsearch.dismiss();
                 mMap.clear();
+
                 mMap.addMarker(new MarkerOptions().position(new LatLng(Constants.location.getLatitude(), Constants.location.getLongitude()))
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
                 listedPlaceList = smartMapsdb.getListedlace();
                 for (int i = 0; i < listedPlaceList.size(); i++) {
+                    Log.d("harsimarSingh",""+listedPlaceList.get(i).category.toString());
                     double distance = distance(Constants.location.getLatitude(), Constants.location.getLongitude(), Double.parseDouble(listedPlaceList.get(i).latitude), Double.parseDouble(listedPlaceList.get(i).longitude));
                     for (int j = 0; j < Constants.selectedCategories.size(); j++) {
+
                         if (listedPlaceList.get(i).category.contains(Constants.selectedCategories.get(j))) {
-                            if (iskm) {
-                                if (distance < distanceVal)
+
                                     mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(listedPlaceList.get(i).latitude), Double.parseDouble(listedPlaceList.get(i).longitude))));
-                            } else {
-                                if (distance * 0.62 < distanceVal)
-                                    mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(listedPlaceList.get(i).latitude), Double.parseDouble(listedPlaceList.get(i).longitude))));
-                            }
+
                         }
                     }
 
@@ -498,18 +504,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             SharedPreferences sharedPreferences = getSharedPreferences(Constants.sharedPrefrencename,MODE_PRIVATE);
             final String search = sharedPreferences.getString(Constants.categorykey,"temple|atm|food|bank|airport");
             final String distan = sharedPreferences.getString(Constants.distancekey,"1000");
-
             for(int i=0;i<listedPlaceList.size();i++){
                 double distance = distance(Constants.location.getLatitude(),Constants.location.getLongitude(),Double.parseDouble(listedPlaceList.get(i).latitude),Double.parseDouble(listedPlaceList.get(i).longitude));
                 Log.e("main",String.valueOf(distance));
-                if(iskm){
-                    if(distance<1)
                         mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(listedPlaceList.get(i).latitude),Double.parseDouble(listedPlaceList.get(i).longitude))));
-                }
-                else {
-                    if(distance*0.62<1)
-                        mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(listedPlaceList.get(i).latitude),Double.parseDouble(listedPlaceList.get(i).longitude))));
-                }
 
             }
 

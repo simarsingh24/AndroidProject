@@ -15,7 +15,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -108,7 +110,9 @@ public class AddNewActivity extends AppCompatActivity implements GoogleMap.OnMyL
                 listedPlace.comments = etComment.getText().toString();
                 listedPlace.longitude = String.valueOf(mark.getPosition().longitude);
                 listedPlace.latitude = String.valueOf(mark.getPosition().latitude);
-                if(getSelectedCategories()!=null) listedPlace.category = getSelectedCategories();
+                //if(getSelectedCategories()!=null)
+                    listedPlace.category = getSelectedCategories();
+                    Log.d("selected category",getSelectedCategories());
                 if(image != null){
                     listedPlace.image = image.getAbsolutePath();
                 }
@@ -146,17 +150,18 @@ public class AddNewActivity extends AppCompatActivity implements GoogleMap.OnMyL
         });
     }
 
-    public String getSelectedCategories(){
-        String result = "";
-        for(int i = 0; i < Constants.selectedCategories.size(); i++) {
-            result += String.valueOf(Constants.selectedCategories.get(i));
-            Log.e("",String.valueOf(Constants.selectedCategories.get(i)));
-            if(i != Constants.selectedCategories.size()-1){
-                result += ",";
+    public String getSelectedCategories() {
+            String result = "";
+            Log.d("harsimarSingh", "size is " + Constants.selectedCategories.size());
+            for (int i = 0; i < Constants.selectedCategories.size(); i++) {
+                result += String.valueOf(Constants.selectedCategories.get(i));
+                Log.e("", String.valueOf(Constants.selectedCategories.get(i)));
+                if (i != Constants.selectedCategories.size() - 1) {
+                    result += ",";
+                }
             }
-        }
-        Constants.selectedCategories.clear();
-        return result;
+            Constants.selectedCategories.clear();
+            return result;
     }
 
     private void dispatchTakePictureIntent() {
