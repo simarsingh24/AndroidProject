@@ -3,6 +3,7 @@ package com.example.rajulnahar.smartmaps.Activity;
 import android.Manifest;
 import android.app.Dialog;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -76,9 +77,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     SmartMapsdb smartMapsdb;
     double lat = 0;
     double lon = 0;
-    Dialog distancedialog;
-    Dialog advsearch;
-    Dialog poiPopup;
+    AlertDialog distancedialog;
+    AlertDialog advsearch;
+    AlertDialog poiPopup;
 
 
     @BindView(R.id.settings)
@@ -131,13 +132,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     ConnectivityManager connectivityManager;
     private FusedLocationProviderClient mFusedLocationClient;
     Location currrentLocation = null;
-
+    private Context context;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         ButterKnife.bind(this);
-
+        context= getApplicationContext();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
 
@@ -280,26 +281,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .enableAutoManage(this, this)
                 .build();
 
-        distancedialog = new Dialog(MapsActivity.this);
-        View view = LayoutInflater.from(MapsActivity.this).inflate(R.layout.distancedialog, null);
-        distancedialog.setContentView(view);
-        distancedialog.setTitle("Select distance in");
+        LayoutInflater inflater = (LayoutInflater)getBaseContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(R.layout.distancedialog, null);
+        distancedialog = new AlertDialog.Builder(this)
+                .create();
+        distancedialog.setTitle("Select Distance in : ");
+        distancedialog.setView(view);
         inkm = (RadioButton) view.findViewById(R.id.distancekm);
         inmiles = (RadioButton) view.findViewById(R.id.distancemile);
+        distancedialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,
+                                        int which) {
+                        if(inkm.isChecked())iskm = true;
+                        else iskm =false;
+                        dialog.dismiss();
+                    }
+                });
 
-        advsearch = new Dialog(MapsActivity.this);
+        advsearch = new AlertDialog.Builder(MapsActivity.this).create();
         view = LayoutInflater.from(MapsActivity.this).inflate(R.layout.searchdailog, null);
         listView = (ListView) view.findViewById(R.id.categorylist);
         listviewAdapter = new ListviewAdapter(this);
         listviewAdapter.setCategories(smartMapsdb.getAllCategories());
         listView.setAdapter(listviewAdapter);
-        advsearch.setContentView(view);
+        advsearch.setView(view);
         advsearch.setTitle("Select Categories");
         avdSearchButton = (Button) view.findViewById(R.id.btn_search);
 
-        poiPopup = new Dialog(MapsActivity.this);
+
+        poiPopup = new AlertDialog.Builder(MapsActivity.this).create();
         view = LayoutInflater.from(MapsActivity.this).inflate(R.layout.popupdialog, null);
-        poiPopup.setContentView(view);
+        poiPopup.setView(view);
         poiPopup.setTitle("POI Popup");
         ll_favourite = (LinearLayout) view.findViewById(R.id.ll_favourite);
         ll_share = (LinearLayout) view.findViewById(R.id.ll_share);
