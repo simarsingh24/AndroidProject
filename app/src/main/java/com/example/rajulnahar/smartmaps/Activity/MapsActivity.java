@@ -71,12 +71,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
 
     public LocationManager locationManager;
-    public LocationListener locationListener;
-    private GoogleApiClient mGoogleApiClient;
-    Location location;
     SmartMapsdb smartMapsdb;
-    double lat = 0;
-    double lon = 0;
     AlertDialog distancedialog;
     AlertDialog advsearch;
     AlertDialog poiPopup;
@@ -145,28 +140,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         requestPermissions();
         initComponent();
         onClicks();
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                while (!gpsfixed) {
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                locationLocked();
-
-
-            }
-        }.execute();
-
 
         seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -272,14 +245,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         smartMapsdb.deleteTables();
         smartMapsdb.testCategory();
         listedPlaceList = smartMapsdb.getListedlace();
-
-
-        mGoogleApiClient = new GoogleApiClient
-                .Builder(this)
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-                .enableAutoManage(this, this)
-                .build();
+        
 
         LayoutInflater inflater = (LayoutInflater)getBaseContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.distancedialog, null);
@@ -344,10 +310,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         likeus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               /* Toast.makeText(MapsActivity.this, "Like us", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MapsActivity.this, "Like us", Toast.LENGTH_SHORT).show();
                 Uri uri = Uri.parse("https://www.facebook.com/Future-Smart-Technologies-Pvt-Ltd-993516597384645/");
                 Intent intent = new Intent(Intent.ACTION_VIEW,uri);
-                startActivity(intent);*/
+                startActivity(intent);
             }
         });
 
@@ -355,20 +321,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 Toast.makeText(MapsActivity.this, "Rate us", Toast.LENGTH_SHORT).show();
-               /* Uri uri = Uri.parse("https://play.google.com/store/apps/details?id=com.bigduckgames.flowbridges&hl=en");
+                Uri uri = Uri.parse("https://play.google.com/store/apps/details?id=com.bigduckgames.flowbridges&hl=en");
                 Intent intent = new Intent(Intent.ACTION_VIEW,uri);
-                startActivity(intent);*/
+                startActivity(intent);
             }
         });
         shareit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(MapsActivity.this, "Share", Toast.LENGTH_SHORT).show();
-                /*String bla = "https://play.google.com/store/apps/details?id=com.bigduckgames.flowbridges&hl=en";
+                String bla = "https://play.google.com/store/apps/details?id=com.bigduckgames.flowbridges&hl=en";
                 Intent sharingIntent = new Intent(Intent.ACTION_SEND);
                 sharingIntent.setType("text/plain");
                 sharingIntent.putExtra(Intent.EXTRA_TEXT,bla);
-                startActivity(Intent.createChooser(sharingIntent,"Select to share"));*/
+                startActivity(Intent.createChooser(sharingIntent,"Select to share"));
             }
         });
 
