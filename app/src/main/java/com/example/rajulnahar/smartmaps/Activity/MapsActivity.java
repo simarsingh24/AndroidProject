@@ -35,6 +35,7 @@ import com.example.rajulnahar.smartmaps.Others.Constants;
 import com.example.rajulnahar.smartmaps.Objects.Favourites;
 import com.example.rajulnahar.smartmaps.Objects.ListedPlace;
 import com.example.rajulnahar.smartmaps.Adapters.ListviewAdapter;
+import com.example.rajulnahar.smartmaps.Others.PermissionUtils;
 import com.example.rajulnahar.smartmaps.R;
 import com.example.rajulnahar.smartmaps.Database.SmartMapsdb;
 import com.google.android.gms.common.ConnectionResult;
