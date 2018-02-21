@@ -26,6 +26,8 @@ import com.example.rajulnahar.smartmaps.Objects.ListedPlace;
 import com.example.rajulnahar.smartmaps.Others.Constants;
 import com.example.rajulnahar.smartmaps.Others.PermissionUtils;
 import com.example.rajulnahar.smartmaps.R;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -34,6 +36,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -87,14 +90,12 @@ public class AddNewActivity extends AppCompatActivity implements GoogleMap.OnMyL
 
     public void initComponents(){
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
         smartMapsdb = SmartMapsdb.getInstance(this);
         Constants.selectedCategories.clear();
         categoryList = smartMapsdb.getAllCategories();
         listviewAdapter = new ListviewAdapter(this);
         listviewAdapter.setCategories(smartMapsdb.getAllCategories());
         listView.setAdapter(listviewAdapter);
-
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -108,12 +109,15 @@ public class AddNewActivity extends AppCompatActivity implements GoogleMap.OnMyL
                 listedPlace.comments = etComment.getText().toString();
                 listedPlace.longitude = String.valueOf(mark.getPosition().longitude);
                 listedPlace.latitude = String.valueOf(mark.getPosition().latitude);
-                listedPlace.category = getSelectedCategories();
+                if(getSelectedCategories()!=null) listedPlace.category = getSelectedCategories();
                 if(image != null){
                     listedPlace.image = image.getAbsolutePath();
                 }
                 Log.e("Database","Databse inset id: "  + String.valueOf(smartMapsdb.addListedPlace(listedPlace)));
                 Log.e("selected category:",listedPlace.category);
+                Toast.makeText(AddNewActivity.this,"Saved!",Toast.LENGTH_SHORT).show();
+                finish();
+
 
             }
         });
@@ -125,9 +129,11 @@ public class AddNewActivity extends AppCompatActivity implements GoogleMap.OnMyL
                 listedPlace.comments = etComment.getText().toString();
                 listedPlace.longitude = String.valueOf(mark.getPosition().longitude);
                 listedPlace.latitude = String.valueOf(mark.getPosition().latitude);
-                listedPlace.category = getSelectedCategories();
+                if(getSelectedCategories()!=null) listedPlace.category = getSelectedCategories();
                 Log.e("Database","Databse inset id: "  + String.valueOf(smartMapsdb.addListedPlace(listedPlace)));
                 Log.e("selected category:",listedPlace.category);
+                Toast.makeText(AddNewActivity.this,"Saved!",Toast.LENGTH_SHORT).show();
+                finish();
 
             }
         });
@@ -184,15 +190,19 @@ public class AddNewActivity extends AppCompatActivity implements GoogleMap.OnMyL
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMarkerDragListener(this);
         mMap.setMyLocationEnabled(true);
-        LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
-        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        if(location!=null) {
-            mark = mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.pin))
-                    .position(new LatLng(location.getLatitude(), location.getLongitude())).draggable(true));
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 13.0f));
-        }
-
-
+        FusedLocationProviderClient mFusedLocationClient ;
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(AddNewActivity.this);
+        mFusedLocationClient.getLastLocation()
+                .addOnSuccessListener(AddNewActivity.this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if (location != null) {
+                            mark = mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.pin))
+                                    .position(new LatLng(location.getLatitude(), location.getLongitude())).draggable(true));
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 13.0f));
+                        }
+                    }
+                });
     }
 
     /**

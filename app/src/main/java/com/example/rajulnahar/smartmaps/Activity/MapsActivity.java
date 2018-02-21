@@ -177,8 +177,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 saveToSharedPrefrences(Constants.distancekey, String.valueOf(distanceVal));
                 mMap.clear();
-                //mMap.addMarker(new MarkerOptions().position(new LatLng(Constants.location.getLatitude(), Constants.location.getLongitude()))
-                  //      .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                mMap.addMarker(new MarkerOptions().position(new LatLng(Constants.location.getLatitude(), Constants.location.getLongitude()))
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
                 listedPlaceList = smartMapsdb.getListedlace();
 
                 for (int i = 0; i < listedPlaceList.size(); i++) {
