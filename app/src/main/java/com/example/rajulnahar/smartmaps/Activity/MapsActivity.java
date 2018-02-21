@@ -54,6 +54,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.OnConnectionFailedListener,
         GpsStatus.Listener,
@@ -68,16 +71,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     SmartMapsdb smartMapsdb;
     double lat = 0;
     double lon = 0;
-    ImageView settings;
-    LinearLayout advancesearch;
-    LinearLayout likeus;
-    LinearLayout rateus;
-    LinearLayout shareit;
-    LinearLayout listedplace;
-    LinearLayout addnew;
     Dialog distancedialog;
     Dialog advsearch;
     Dialog poiPopup;
+
+
+    @BindView(R.id.settings)
+    ImageView settings;
+    @BindView(R.id.advancesearch)
+    LinearLayout advancesearch;
+    @BindView(R.id.likeus)
+    LinearLayout likeus;
+    @BindView(R.id.rateus)
+    LinearLayout rateus;
+    @BindView(R.id.shareit)
+    LinearLayout shareit;
+    @BindView(R.id.listedplace)
+    LinearLayout listedplace;
+    @BindView(R.id.addnew)
+    LinearLayout addnew;
+    @BindView(R.id.seekBar)
+    SeekBar seekbar;
+
 
     double latitudePOISelected = 0;
     double longitudePOISelected = 0;
@@ -94,7 +109,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     LinearLayout ll_favourite;
     LinearLayout ll_share;
     TextView tvDrivingDirection, tvWalkingDirection;
-    SeekBar seekbar;
 
     public long lastgps = 0;
     public static boolean gpsfixed = false;
@@ -117,7 +131,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-
+        ButterKnife.bind(this);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -227,15 +241,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             alertToSwitchGPS();
         }
         connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-        settings = (ImageView) findViewById(R.id.settings);
-        advancesearch = (LinearLayout) findViewById(R.id.advancesearch);
-        likeus = (LinearLayout) findViewById(R.id.likeus);
-        rateus = (LinearLayout) findViewById(R.id.rateus);
-        shareit = (LinearLayout) findViewById(R.id.shareit);
-        listedplace = (LinearLayout) findViewById(R.id.listedplace);
-        addnew = (LinearLayout) findViewById(R.id.addnew);
-        seekbar = (SeekBar) findViewById(R.id.seekBar);
-
         listedPlaceList = new ArrayList<>();
         //test purpose
         smartMapsdb = SmartMapsdb.getInstance(MapsActivity.this);
